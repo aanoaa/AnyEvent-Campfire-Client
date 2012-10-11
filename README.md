@@ -1,6 +1,6 @@
 ### install ###
 
-    $ cpanm AnyEvent::Campfire::Client    # not yet working
+    $ cpanm AnyEvent::Campfire::Client
 
 ### usage ###
 
