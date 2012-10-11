@@ -135,7 +135,7 @@ __PACKAGE__->meta->make_immutable;
     use AnyEvent::Campfire::Client;
     my $client = AnyEvent::Campfire::Client->new(
         token => 'xxxx',
-        rooms => '1234a',
+        rooms => '1234',
         account => 'p5-hubot',
     );
 
