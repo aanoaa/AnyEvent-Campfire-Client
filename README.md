@@ -15,7 +15,7 @@ my $client = AnyEvent::Campfire::Client->new(
 $client->on(
     'join',
     sub {
-        my ($self, $data) = @_;
+        my ($e, $data) = @_;    # $e is event emitter. please ignore it.
         $client->speak($data->{room_id}, "hi");
     }
 );
@@ -23,7 +23,7 @@ $client->on(
 $client->on(
     'message',
     sub {
-        my ($self, $data) = @_;
+        my ($e, $data) = @_;
         # ...
     }
 );

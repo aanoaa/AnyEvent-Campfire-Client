@@ -142,7 +142,7 @@ __PACKAGE__->meta->make_immutable;
     $client->on(
         'join',
         sub {
-            my ($self, $data) = @_;
+            my ($e, $data) = @_; # $e is event emitter. please ignore it.
             $client->speak($data->{room}, "hi");
         }
     );
@@ -150,7 +150,7 @@ __PACKAGE__->meta->make_immutable;
     $client->on(
         'message',
         sub {
-            my ($self, $data) = @_;
+            my ($e, $data) = @_;
             # ...
         }
     );
