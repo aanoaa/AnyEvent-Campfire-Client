@@ -16,46 +16,72 @@ my $client = AnyEvent::Campfire::Client->new(
 $client->on(
     'join',
     sub {
-        my ( $self, $room ) = @_;
-        warn "-- join\n";
-        $client->speak( $room, "hi" );
+        my ( $e, $room ) = @_;
+        print "joined room($room)\n";
+
+        $client->lock(
+            '535881',
+            sub {
+                my ( $body, $hdr ) = @_;
+                if ( $hdr->{Status} !~ m/2/ ) {
+                    $client->emit( 'error', "$hdr->{Status}: $hdr->{Reason}" );
+                    $client->exit;
+                }
+                else {
+                    print "$hdr->{Status}: locked room\n";
+                    $client->unlock(
+                        '535881',
+                        sub {
+                            my ( $body, $hdr ) = @_;
+                            if ( $hdr->{Status} !~ m/2/ ) {
+                                $client->emit( 'error',
+                                    "$hdr->{Status}: $hdr->{Reason}" );
+                                $client->exit;
+                            }
+                            else {
+                                print "$hdr->{Status}: unlocked room\n";
+                                $client->exit;
+                            }
+                        }
+                    );
+                }
+            }
+        );
+
+        #    $client->put_room('535881', encode_json({ room => { name => 'Room 1', topic => 'oops' } }), sub {
+        #        my ($body, $hdr) = @_;
+        #        if ($hdr->{Status} !~ m/2/) {
+        #            $client->emit('error', "$hdr->{Status}: $hdr->{Reason}");
+        #        } else {
+        #            print "$hdr->{Status}: updated room\n";
+        #        }
+        #
+        #        $client->exit;
+        #    });
+        #
+        #    $client->get_rooms(sub {
+        #        my ($body, $hdr) = @_;
+        #        if ($hdr->{Status} !~ m/2/) {
+        #            $client->emit('error', "$hdr->{Status}: $hdr->{Reason}");
+        #        } else {
+        #            $body = encode_json($body) if 'HASH' eq ref($body);
+        #            print "$hdr->{Status}: $body\n";
+        #        }
+        #
+        #        $client->exit;
+        #    });
     }
 );
-
-$client->on(
-    'message',
-    sub {
-        my ( $e, $data ) = @_;
-        warn "-- message\n";
-        p $data;
-        return unless defined $data->{body};
-        if ( $data->{body} eq 'leave' ) {
-            $client->exit;
-        }
-
-        if ( $data->{body} eq 'say hello' ) {
-            $client->speak( $data->{room_id}, "hello" );
-        }
-    }
-);
-
+$client->on( 'error', sub { print "ERROR: $_[1]\n" } );
 $client->on(
     'leave',
     sub {
-        my ( $e, $data ) = @_;
-        warn "-- leave\n";
-        p $data;
-        $cv->send;
+        my ( $e, $room ) = @_;
+        print "leaved room($room)\n";
     }
 );
 
-$client->on(
-    'error',
-    sub {
-        my ( $self, $error ) = @_;
-        warn "-- error\n";
-    }
-);
+$client->on( 'exit', sub { $cv->send } );
 
 $cv->recv;
 
