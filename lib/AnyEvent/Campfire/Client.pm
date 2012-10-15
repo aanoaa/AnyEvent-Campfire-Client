@@ -20,8 +20,8 @@ has 'account' => (
 );
 
 has 'uri' => (
-    is => 'ro',
-    isa => 'URI',
+    is         => 'ro',
+    isa        => 'URI',
     lazy_build => 1,
 );
 
@@ -93,7 +93,7 @@ sub leave {
             }
 
             $self->emit( 'leave', $room );
-            $self->emit( 'exit' ) if ($room eq @{ $self->rooms }[-1]);
+            $self->emit('exit') if ( $room eq @{ $self->rooms }[-1] );
         }
     );
 }
@@ -106,62 +106,65 @@ sub exit {
 }
 
 sub get_account {
-    my ($self, $callback) = @_;
-    $self->get('/account', $callback);
+    my ( $self, $callback ) = @_;
+    $self->get( '/account', $callback );
 }
 
 sub recent {
-    my ($self, $room, $opt, $callback) = @_;
+    my ( $self, $room, $opt, $callback ) = @_;
     return unless $room;
 
-    if ('CODE' eq ref $opt) {
+    if ( 'CODE' eq ref $opt ) {
         $callback = $opt;
-    } else {
+    }
+    else {
         # limit, since_message_id
         $self->uri->query_form($opt);
     }
 
-    $self->get("/room/$room/recent", $callback);
+    $self->get( "/room/$room/recent", $callback );
 }
 
 sub get_rooms {
-    my ($self, $callback) = @_;
-    $self->get('/rooms', $callback);
+    my ( $self, $callback ) = @_;
+    $self->get( '/rooms', $callback );
 }
 
 sub put_room {
-    my ($self, $room, $room_info, $callback) = @_;
+    my ( $self, $room, $room_info, $callback ) = @_;
     $room_info = encode_json($room_info) if ref($room_info) eq 'HASH';
-    $self->put("/room/$room", $room_info, $callback);
+    $self->put( "/room/$room", $room_info, $callback );
 }
 
 sub lock {
-    my ($self, $room, $callback) = @_;
-    $self->post("/room/$room/lock", $callback);
+    my ( $self, $room, $callback ) = @_;
+    $self->post( "/room/$room/lock", $callback );
 }
 
 sub unlock {
-    my ($self, $room, $callback) = @_;
-    $self->post("/room/$room/unlock", $callback);
+    my ( $self, $room, $callback ) = @_;
+    $self->post( "/room/$room/unlock", $callback );
 }
 
 sub request {
-    my ($self, $method, $path, $reqBody, $callback) = @_;
+    my ( $self, $method, $path, $reqBody, $callback ) = @_;
 
     $self->uri->path($path);
-    my $scope = AnyEvent::HTTP::ScopedClient->new($self->uri);
-    $scope->header({
-        Authorization  => $self->authorization,
-        Accept         => 'application/json',
-        'Content-Type' => 'application/json',
-    })->request($method, $reqBody, $callback);
-    $self->uri->query_form(''); # clear query
+    my $scope = AnyEvent::HTTP::ScopedClient->new( $self->uri );
+    $scope->header(
+        {
+            Authorization  => $self->authorization,
+            Accept         => 'application/json',
+            'Content-Type' => 'application/json',
+        }
+    )->request( $method, $reqBody, $callback );
+    $self->uri->query_form('');    # clear query
 }
 
-sub get { shift->request('GET', @_) }
-sub post { shift->request('POST', @_) }
-sub put { shift->request('PUT', @_) }
-sub delete { shift->request('DELETE', @_) }
+sub get    { shift->request( 'GET',    @_ ) }
+sub post   { shift->request( 'POST',   @_ ) }
+sub put    { shift->request( 'PUT',    @_ ) }
+sub delete { shift->request( 'DELETE', @_ ) }
 
 __PACKAGE__->meta->make_immutable;
 
