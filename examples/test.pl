@@ -8,9 +8,9 @@ use Data::Printer;
 my $cv = AnyEvent->condvar;
 
 my $client = AnyEvent::Campfire::Client->new(
-    token   => '', # your token here
-    rooms   => '', # room number
-    account => '', # uh?
+    token   => '',    # your token here
+    rooms   => '',    # room number
+    account => '',    # uh?
 );
 
 $client->on(
