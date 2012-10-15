@@ -181,8 +181,8 @@ __PACKAGE__->meta->make_immutable;
     $client->on(
         'join',
         sub {
-            my ($e, $data) = @_; # $e is event emitter. please ignore it.
-            $client->speak($data->{room}, "hi");
+            my ($e, $room_id) = @_; # $e is event emitter. please ignore it.
+            $client->speak($room_id, "hi");
         }
     );
 
